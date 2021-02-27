@@ -17,21 +17,36 @@ namespace conway2
         {
             InitializeComponent();
             InitialState();
+
         }
 
         private void InitialState()
         {
-            int panelOffset = Variables.panelOffset;
-            int width = Variables.width;
             int size = Variables.size;
 
-            cell test = new cell(panelOffset + 0, panelOffset + 0);
-            Controls.Add(test);
-
-            for (int i = 1; i < size; i++)
+            for (int y = 0; y < size; y++)
             {
-                cell test2 = new cell(panelOffset + i*width, panelOffset + i*width);
-                Controls.Add(test2);
+                for (int z = 0; z < size; z++)
+                {
+                    Variables.organism[y, z] = new Cell(y, z);
+                    Controls.Add(Variables.organism[y, z]);
+
+                    Variables.organism[y, z].Click += new EventHandler(cell_Click);
+                }
+            }
+        }
+
+        private void cell_Click(object sender, EventArgs e)
+        {
+            Label clickedCell = sender as Label;
+
+            if (clickedCell.BackColor == Variables.aliveColor)
+            {
+                clickedCell.BackColor = Variables.deadColor;
+            }
+            else
+            {
+                clickedCell.BackColor = Variables.aliveColor;
             }
         }
 
@@ -41,19 +56,82 @@ namespace conway2
             int panelOffset = Variables.panelOffset;
             int panelSize = Variables.panelSize;
 
-            Pen panelOutline = new Pen(Color.FromArgb(255, 255, 255, 0), 2);
+            Pen panelOutline = new Pen(Color.FromArgb(255,255,255), 2);
+            Brush panelBackground = new SolidBrush(Color.FromArgb(33, 31, 45));
 
             canvas.DrawRectangle(panelOutline, panelOffset -1, panelOffset - 1, panelSize + 2, panelSize + 2);
-            canvas.FillRectangle(Brushes.Orange, panelOffset, panelOffset, panelSize, panelSize);
+            canvas.FillRectangle(panelBackground, panelOffset, panelOffset, panelSize, panelSize);
+        }
+
+        private void newGenButton_Click(object sender, EventArgs e)
+        {
+            int size = Variables.size;
+            int neighbourCount;
+            int[,] neighbourCells = new int[,] {
+                { -1, -1 },
+                { -1, 1 },
+                { 1, -1 },
+                { 1, 1 },
+                { 0, 1 },
+                { 1, 0 },
+                { 0, -1 },
+                { -1, 0 } 
+            };
+
+            int[,] dummy = new int[size*size, 3];
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    neighbourCount = 0;
+
+                    for (int w = 0; w < 8; w++)
+                    {
+                        try
+                        {
+                            if (Variables.organism[y + neighbourCells[w, 0], z + neighbourCells[w, 1]].BackColor == Variables.aliveColor)
+                            {
+                                neighbourCount++;
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        
+                    }
+
+                    Variables.organism[y, z].Text = neighbourCount.ToString();
+
+                    if (Variables.organism[y, z].BackColor == Variables.aliveColor && (neighbourCount == 2 || neighbourCount == 3))
+                    {
+                    }
+                    else if (Variables.organism[y, z].BackColor == Variables.deadColor && (neighbourCount == 3))
+                    {
+                        Variables.organism[y, z].BackColor = Variables.aliveColor;
+                    }
+                    else
+                    {
+                        Variables.organism[y, z].BackColor = Variables.deadColor;
+                    }
+                }
+            }
         }
     }
 
     public class Variables
     {
-        public static int panelOffset = 100;            // odsazení panelu s buňkami od levého horního rohu
-        public static int panelSize = 500;              // velikost panelu s buňkami
-        public static int size = 10;                    // počet buněk v řádce/sloupci panelu s buňkami
-        public static int width = panelSize / size;     // výpočet šířky jedné buňky
-        static cell[] organism = new cell[size * size]; // array držící informace o všech buňkách
+        public static int panelOffset = 100;                    // odsazení panelu s buňkami od levého horního rohu
+        public static int panelSize = 500;                      // velikost panelu s buňkami
+        public static int size = 10;                            // počet buněk v řádce/sloupci panelu s buňkami
+        public static int width = panelSize / size;             // výpočet šířky jedné buňky
+        
+        public static Cell[,] organism = new Cell[size, size];  // array držící informace o všech buňkách
+
+        public static Color aliveColor = Color.FromArgb(245, 50, 85);
+        public static Color deadColor = Color.FromArgb(0, 0, 0, 0);
     }
 }
+
+        // finish dummy array
+        // fix border cell new gens
