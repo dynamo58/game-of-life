@@ -17,7 +17,7 @@ namespace conway2
         {
             InitializeComponent();
             InitialState();
-
+            timer1.Tick += new EventHandler(newGenButton_Click);
         }
 
         private void InitialState()
@@ -75,10 +75,10 @@ namespace conway2
                 { 0, 1 },
                 { 1, 0 },
                 { 0, -1 },
-                { -1, 0 } 
+                { -1, 0 }
             };
 
-            int[,] dummy = new int[size*size, 3];
+            int[,] dummy = new int[size, size];
 
             for (int y = 0; y < size; y++)
             {
@@ -95,18 +95,18 @@ namespace conway2
                                 neighbourCount++;
                             }
                         }
-                        catch
-                        {
-                        }
-                        
+                        catch { }
                     }
+                    dummy[y, z] = neighbourCount;
+                }
+            }
 
-                    Variables.organism[y, z].Text = neighbourCount.ToString();
-
-                    if (Variables.organism[y, z].BackColor == Variables.aliveColor && (neighbourCount == 2 || neighbourCount == 3))
-                    {
-                    }
-                    else if (Variables.organism[y, z].BackColor == Variables.deadColor && (neighbourCount == 3))
+            for (int y = 0; y < size; y++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    if (Variables.organism[y, z].BackColor == Variables.aliveColor && (dummy[y,z] == 2 || dummy[y, z] == 3)) {}
+                    else if (Variables.organism[y, z].BackColor == Variables.deadColor && (dummy[y, z] == 3))
                     {
                         Variables.organism[y, z].BackColor = Variables.aliveColor;
                     }
@@ -117,13 +117,30 @@ namespace conway2
                 }
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (timer1.Enabled == false)
+            {
+                timer1.Start();
+            }
+            else
+            {
+                timer1.Stop();
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public class Variables
     {
         public static int panelOffset = 100;                    // odsazení panelu s buňkami od levého horního rohu
         public static int panelSize = 500;                      // velikost panelu s buňkami
-        public static int size = 10;                            // počet buněk v řádce/sloupci panelu s buňkami
+        public static int size = 20;                            // počet buněk v řádce/sloupci panelu s buňkami
         public static int width = panelSize / size;             // výpočet šířky jedné buňky
         
         public static Cell[,] organism = new Cell[size, size];  // array držící informace o všech buňkách
@@ -133,5 +150,17 @@ namespace conway2
     }
 }
 
-        // finish dummy array
-        // fix border cell new gens
+//      the program needs to get optimized it runs like a fucking potato
+//      i'll try fixing this by splitting up the 'new generation' process
+//      could not be arsed to deal with it now 
+//      
+//      ⠀⠀⠀⠀⣀⣀⣤⣤⣦⣶⢶⣶⣿⣿⣿⣿⣿⣿⣿⣷⣶⣶⡄⠀⠀⠀⠀⠀⠀⠀
+//          ⣿⣿⣿⠿⣿⣿⣾⣿⣿⣿⣿⣿⣿⠟⠛⠛⢿⣿⡇⠀⠀⠀⠀⠀⠀⠀
+//          ⣿⡟⠡⠂⠀⢹⣿⣿⣿⣿⣿⣿⡇⠘⠁⠀⠀⣿⡇⠀⢠⣄⠀⠀⠀⠀
+//          ⢸⣗⢴⣶⣷⣷⣿⣿⣿⣿⣿⣿⣷⣤⣤⣤⣴⣿⣗⣄⣼⣷⣶⡄⠀⠀
+//         ⢀⣾⣿⡅⠐⣶⣦⣶⠀⢰⣶⣴⣦⣦⣶⠴⠀⢠⣿⣿⣿⣿⣼⣿⡇⠀⠀
+//      ⠀⠀⢀⣾⣿⣿⣷⣬⡛⠷⣿⣿⣿⣿⣿⣿⣿⠿⠿⣠⣿⣿⣿⣿⣿⠿⠛⠃⠀⠀
+//          ⢸⣿⣿⣿⣿⣿⣿⣿⣶⣦⣭⣭⣥⣭⣵⣶⣿⣿⣿⣿⣟⠉⠀⠀⠀⠀⠀⠀
+//           ⠙⠇⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀
+//              ⣿⣿⣿⣿⣿⣛⠛⠛⠛⠛⠛⢛⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀
+//              ⠿⣿⣿⣿⠿⠿⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⠿⠇⠀

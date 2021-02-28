@@ -19,6 +19,7 @@ namespace conway2
             Size = new System.Drawing.Size(Variables.width, Variables.width);
             BackColor = Variables.deadColor;
             ForeColor = System.Drawing.Color.White;
+            TextAlign = ContentAlignment.MiddleCenter;
         }
     }
 }
