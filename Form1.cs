@@ -16,9 +16,24 @@ namespace conway2
         public Form1()
         {
             InitializeComponent();
-            InitialState();
             timer1.Tick += new EventHandler(newGenButton_Click);
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            InitialState();
+        }
+
+        int[,] neighbourCells = new int[,] {
+                { -1, -1 },
+                { -1,  1 },
+                {  1, -1 },
+                {  1,  1 },
+                {  0,  1 },
+                {  1,  0 },
+                {  0, -1 },
+                { -1,  0 }
+        };
 
         private void InitialState()
         {
@@ -63,20 +78,32 @@ namespace conway2
             canvas.FillRectangle(panelBackground, panelOffset, panelOffset, panelSize, panelSize);
         }
 
-        private void newGenButton_Click(object sender, EventArgs e)
+        int getCount(int x, int y)
         {
             int size = Variables.size;
-            int neighbourCount;
-            int[,] neighbourCells = new int[,] {
-                { -1, -1 },
-                { -1, 1 },
-                { 1, -1 },
-                { 1, 1 },
-                { 0, 1 },
-                { 1, 0 },
-                { 0, -1 },
-                { -1, 0 }
-            };
+            int neighbourCount = 0;
+
+            for (int w = 0; w < 8; w++)
+            {
+                try
+                {
+                    if (Variables.organism[x + neighbourCells[w, 0], y + neighbourCells[w, 1]].BackColor == Variables.aliveColor)
+                    {
+                        neighbourCount++;
+                    }
+                }
+                catch { }
+            }
+
+            return (neighbourCount);
+        }
+
+        private void newGenButton_Click(object sender, EventArgs e)
+        {
+            Cell[,] organism = Variables.organism;
+            int size = Variables.size;
+            Color aliveColor = Variables.aliveColor;
+            Color deadColor = Variables.deadColor;
 
             int[,] dummy = new int[size, size];
 
@@ -84,20 +111,7 @@ namespace conway2
             {
                 for (int z = 0; z < size; z++)
                 {
-                    neighbourCount = 0;
-
-                    for (int w = 0; w < 8; w++)
-                    {
-                        try
-                        {
-                            if (Variables.organism[y + neighbourCells[w, 0], z + neighbourCells[w, 1]].BackColor == Variables.aliveColor)
-                            {
-                                neighbourCount++;
-                            }
-                        }
-                        catch { }
-                    }
-                    dummy[y, z] = neighbourCount;
+                    dummy[y, z] = getCount(y, z);
                 }
             }
 
@@ -105,17 +119,19 @@ namespace conway2
             {
                 for (int z = 0; z < size; z++)
                 {
-                    if (Variables.organism[y, z].BackColor == Variables.aliveColor && (dummy[y,z] == 2 || dummy[y, z] == 3)) {}
-                    else if (Variables.organism[y, z].BackColor == Variables.deadColor && (dummy[y, z] == 3))
+                    if (organism[y, z].BackColor == aliveColor && (dummy[y,z] == 2 || dummy[y, z] == 3)) {}
+                    else if (organism[y, z].BackColor == deadColor && (dummy[y, z] == 3))
                     {
-                        Variables.organism[y, z].BackColor = Variables.aliveColor;
+                        organism[y, z].BackColor = aliveColor;
                     }
                     else
                     {
-                        Variables.organism[y, z].BackColor = Variables.deadColor;
+                        organism[y, z].BackColor = deadColor;
                     }
                 }
             }
+
+            Variables.organism = organism;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -130,17 +146,14 @@ namespace conway2
             }
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
-        {
 
-        }
     }
 
     public class Variables
     {
         public static int panelOffset = 100;                    // odsazení panelu s buňkami od levého horního rohu
         public static int panelSize = 500;                      // velikost panelu s buňkami
-        public static int size = 20;                            // počet buněk v řádce/sloupci panelu s buňkami
+        public static int size = 10;                            // počet buněk v řádce/sloupci panelu s buňkami
         public static int width = panelSize / size;             // výpočet šířky jedné buňky
         
         public static Cell[,] organism = new Cell[size, size];  // array držící informace o všech buňkách
@@ -151,16 +164,4 @@ namespace conway2
 }
 
 //      the program needs to get optimized it runs like a fucking potato
-//      i'll try fixing this by splitting up the 'new generation' process
-//      could not be arsed to deal with it now 
-//      
-//      ⠀⠀⠀⠀⣀⣀⣤⣤⣦⣶⢶⣶⣿⣿⣿⣿⣿⣿⣿⣷⣶⣶⡄⠀⠀⠀⠀⠀⠀⠀
-//          ⣿⣿⣿⠿⣿⣿⣾⣿⣿⣿⣿⣿⣿⠟⠛⠛⢿⣿⡇⠀⠀⠀⠀⠀⠀⠀
-//          ⣿⡟⠡⠂⠀⢹⣿⣿⣿⣿⣿⣿⡇⠘⠁⠀⠀⣿⡇⠀⢠⣄⠀⠀⠀⠀
-//          ⢸⣗⢴⣶⣷⣷⣿⣿⣿⣿⣿⣿⣷⣤⣤⣤⣴⣿⣗⣄⣼⣷⣶⡄⠀⠀
-//         ⢀⣾⣿⡅⠐⣶⣦⣶⠀⢰⣶⣴⣦⣦⣶⠴⠀⢠⣿⣿⣿⣿⣼⣿⡇⠀⠀
-//      ⠀⠀⢀⣾⣿⣿⣷⣬⡛⠷⣿⣿⣿⣿⣿⣿⣿⠿⠿⣠⣿⣿⣿⣿⣿⠿⠛⠃⠀⠀
-//          ⢸⣿⣿⣿⣿⣿⣿⣿⣶⣦⣭⣭⣥⣭⣵⣶⣿⣿⣿⣿⣟⠉⠀⠀⠀⠀⠀⠀
-//           ⠙⠇⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀
-//              ⣿⣿⣿⣿⣿⣛⠛⠛⠛⠛⠛⢛⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀
-//              ⠿⣿⣿⣿⠿⠿⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⠿⠇⠀
+//       i dont fucking know whats the problem i feel so fucking stupid and fedup width this shit
