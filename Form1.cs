@@ -17,6 +17,7 @@ namespace conway2
         {
             InitializeComponent();
             timer1.Tick += new EventHandler(newGenButton_Click);
+            Random rand = new Random();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -80,7 +81,6 @@ namespace conway2
 
         int getCount(int x, int y)
         {
-            int size = Variables.size;
             int neighbourCount = 0;
 
             for (int w = 0; w < 8; w++)
@@ -100,7 +100,6 @@ namespace conway2
 
         private void newGenButton_Click(object sender, EventArgs e)
         {
-            Cell[,] organism = Variables.organism;
             int size = Variables.size;
             Color aliveColor = Variables.aliveColor;
             Color deadColor = Variables.deadColor;
@@ -119,19 +118,17 @@ namespace conway2
             {
                 for (int z = 0; z < size; z++)
                 {
-                    if (organism[y, z].BackColor == aliveColor && (dummy[y,z] == 2 || dummy[y, z] == 3)) {}
-                    else if (organism[y, z].BackColor == deadColor && (dummy[y, z] == 3))
+                    if (Variables.organism[y, z].BackColor == aliveColor && (dummy[y,z] == 2 || dummy[y, z] == 3)) {}
+                    else if (Variables.organism[y, z].BackColor == deadColor && (dummy[y, z] == 3))
                     {
-                        organism[y, z].BackColor = aliveColor;
+                        Variables.organism[y, z].BackColor = aliveColor;
                     }
                     else
                     {
-                        organism[y, z].BackColor = deadColor;
+                        Variables.organism[y, z].BackColor = deadColor;
                     }
                 }
             }
-
-            Variables.organism = organism;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -146,22 +143,74 @@ namespace conway2
             }
         }
 
+        private void updateButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Convert.ToInt32(sizeTextBox.Text) > 0)
+                {
+                    for (int y = 0; y < Variables.size; y++)
+                    {
+                        for (int z = 0; z < Variables.size; z++)
+                        {
+                            Variables.organism[y, z].Dispose();
+                        }
+                    }
 
+                    Variables.size = Convert.ToInt32(sizeTextBox.Text);
+                    Variables.width = Variables.panelSize / Variables.size;
+                    Variables.organism = new Cell[Variables.size, Variables.size];
+
+                    for (int y = 0; y < Variables.size; y++)
+                    {
+                        for (int z = 0; z < Variables.size; z++)
+                        {
+                            Variables.organism[y, z] = new Cell(y, z);
+                            Controls.Add(Variables.organism[y, z]);
+
+                            Variables.organism[y, z].Click += new EventHandler(cell_Click);
+                        }
+                    }
+
+                    label2.Text = Variables.size.ToString();
+                }
+            }
+            catch { }
+        }
+
+        private void randomizeButton_Click(object sender, EventArgs e)
+        {
+            Random rand = new Random();
+
+            for (int y = 0; y < Variables.size; y++)
+            {
+                for (int z = 0; z < Variables.size; z++)
+                {
+                    int random = rand.Next(1,11);
+
+                    if (random % 2 == 0)
+                    {
+                        Variables.organism[y, z].BackColor = Variables.aliveColor;
+                    }
+                    else
+                    {
+                        Variables.organism[y, z].BackColor = Variables.deadColor;
+                    } 
+                }
+            }
+        }
     }
 
     public class Variables
     {
         public static int panelOffset = 100;                    // odsazení panelu s buňkami od levého horního rohu
         public static int panelSize = 500;                      // velikost panelu s buňkami
-        public static int size = 10;                            // počet buněk v řádce/sloupci panelu s buňkami
+        public static int size = 25;                            // počet buněk v řádce/sloupci panelu s buňkami
         public static int width = panelSize / size;             // výpočet šířky jedné buňky
         
         public static Cell[,] organism = new Cell[size, size];  // array držící informace o všech buňkách
 
-        public static Color aliveColor = Color.FromArgb(245, 50, 85);
-        public static Color deadColor = Color.FromArgb(0, 0, 0, 0);
+        public static Color aliveColor = Color.FromArgb(245, 50, 85);   // barva, která je přidána buňce, která je naživu
+        public static Color deadColor = Color.FromArgb(0, 0, 0, 0);     // barva, která je přidána buňce, která je mrtvá
     }
 }
-
-//      the program needs to get optimized it runs like a fucking potato
-//       i dont fucking know whats the problem i feel so fucking stupid and fedup width this shit
